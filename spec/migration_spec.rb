@@ -122,7 +122,17 @@ describe ActiveRecord::Migration do
     lambda { RemoveConstraintTestChild.create!(:parent_id => max_parent_id + 1) }.should_not raise_error
   end
 
-  it "should strip fk constraints when loding fixtures by default"
+  class MultipleConstraintTestChild < ActiveRecord::Base
+  end
 
-  it "should not strip fk constraints when preserve_fk_constraints is set"
+  it "should strip all fk constraints" do
+    connection.create_table :multiple_constraint_test_children do |t|
+      t.integer :parent_id
+      t.string :parent_name, :references => 'parents(name)'
+    end
+    lambda { MultipleConstraintTestChild.create!(:parent_name => 'non-existent', :parent_id => max_parent_id + 1) }.should raise_error(ActiveRecord::StatementInvalid)
+    connection.remove_all_foreign_key_constraints(:multiple_constraint_test_children)
+    lambda { MultipleConstraintTestChild.create!(:parent_name => 'non_existent', :parent_id => max_parent_id + 1) }.should_not raise_error
+  end
+
 end

@@ -23,8 +23,8 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   
   alias_method_chain :add_column_options!, :foreign_key_constraints
 
-  def strip_all_foreign_key_constraints(table_name)
-    all_foreign_key_constraints_for(table_name).each {|c| drop_fk_constraint(table_name, c)}
+  def remove_all_foreign_key_constraints(table_name)
+    all_foreign_key_constraints_for(table_name).each {|c| remove_constraint(table_name, c)}
   end
 
   def all_foreign_key_constraints_for(table_name)
@@ -32,7 +32,7 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
       "conrelid='#{table_name}'::regclass::oid AND contype='f'")
   end
 
-  def drop_fk_constraint(table_name, constraint_name)
+  def remove_constraint(table_name, constraint_name)
     execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{constraint_name}"
   end
 end

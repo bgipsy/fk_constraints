@@ -1,41 +1,20 @@
-require 'rubygems'
-require 'active_record'
-
+require File.dirname(__FILE__) + '/spec_helper'
 require File.dirname(__FILE__) + '/../init'
 
-DB_CONFIG = {
-  :adapter => 'postgresql',
-  :min_messages => 'fatal',
-  :database => 'fk_constraints_plugin_test',
-  :username => 'postgres'}.with_indifferent_access
-
-LOG_FILE = File.dirname(__FILE__) + '/../test.log'
-
-
 describe ActiveRecord::Migration do
+  include SpecHelper
 
   class Parent < ActiveRecord::Base
     has_many :children
   end
 
   before(:all) do
-    recreate_database(DB_CONFIG)
-    ActiveRecord::Base.logger = Logger.new(LOG_FILE)
-    ActiveRecord::Base.establish_connection(DB_CONFIG)
+    recreate_database
+    setup_active_record
 
     connection.create_table :parents do |t|
       t.string :name
     end
-  end
-
-  def recreate_database(config)
-    ActiveRecord::Base.establish_connection(config.merge(:database => 'template1'))
-    ActiveRecord::Base.connection.drop_database(config['database'])
-    ActiveRecord::Base.connection.create_database(config['database'])
-  end
-
-  def connection
-    ActiveRecord::Base.connection
   end
 
   def max_parent_id

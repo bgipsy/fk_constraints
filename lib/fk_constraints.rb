@@ -1,3 +1,5 @@
+require 'active_record/connection_adapters/postgresql_adapter'
+
 class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   def add_foreign_key_constraint(table_name, column_name, referenced_table_name, referenced_column_name = 'id')
     execute "ALTER TABLE #{table_name} ADD FOREIGN KEY (#{column_name}) REFERENCES #{referenced_table_name}(#{referenced_column_name})"
@@ -28,7 +30,7 @@ end
 
 class ActiveRecord::ConnectionAdapters::AbstractAdapter
   def referenced_table_name(column_name)
-    $1.pluralize if column_name != 'parent_id' && column_name =~ /^(.*)_id$/
+    $1.pluralize if column_name =~ /^(.*)_id$/
   end
 end
 

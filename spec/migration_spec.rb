@@ -1,5 +1,8 @@
 require 'rubygems'
 require 'active_record'
+require 'active_support/test_case'
+require 'active_record/fixtures'
+require 'test/unit/ui/console/testrunner'
 
 require File.dirname(__FILE__) + '/../init'
 
@@ -122,7 +125,17 @@ describe ActiveRecord::Migration do
     lambda { RemoveConstraintTestChild.create!(:parent_id => max_parent_id + 1) }.should_not raise_error
   end
 
-  it "should strip fk constraints when loding fixtures by default"
+  class LoadFixturesWithFkStrippingTest < ActiveSupport::TestCase
+    fixtures :my_lovely_fixtures
+
+    def test_something
+      assert true
+    end
+  end
+
+  it "should strip fk constraints when loding fixtures by default" do
+    Test::Unit::UI::Console::TestRunner.run(LoadFixturesWithFkStrippingTest)
+  end
 
   it "should not strip fk constraints when preserve_fk_constraints is set"
 end

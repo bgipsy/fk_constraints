@@ -33,16 +33,6 @@ describe ActiveRecord::Migration do
     ActiveRecord::Base.connection.create_database(config['database'])
   end
 
-  #it "test should at least run migrations" do
-  #  ActiveRecord::Migration.verbose = false
-  #  ActiveRecord::Migrator.migrate(MIGRATIONS_PATH, nil)
-  #  m = Parent.new(:name => 'A')
-  #  m.children.build(:name => 'B')
-  #  m.save.should be_true
-  #  Parent.count.should == 1
-  #  Child.count.should == 1
-  #end
-
   def connection
     ActiveRecord::Base.connection
   end

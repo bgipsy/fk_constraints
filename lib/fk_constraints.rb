@@ -4,6 +4,15 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   def add_foreign_key_constraint(table_name, column_name, referenced_table_name, referenced_column_name = 'id')
     execute "ALTER TABLE #{table_name} ADD FOREIGN KEY (#{column_name}) REFERENCES #{referenced_table_name}(#{referenced_column_name})"
   end
+
+  def remove_foreign_key_constraint(table_name, column_name)
+    execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{foreign_key_constraint_name(table_name, column_name)}"
+  end
+
+  def foreign_key_constraint_name(table_name, column_name)
+    select_value("SELECT conname FROM pg_constraint JOIN pg_attribute ON (attrelid=conrelid AND ARRAY[attnum] <@ conkey) WHERE " +
+      "conrelid='#{table_name}'::regclass::oid AND contype='f' AND attname='#{column_name}'")
+  end
   
   def add_column_options_with_foreign_key_constraints!(sql, options)
     add_column_options_without_foreign_key_constraints!(sql, options)
@@ -14,17 +23,17 @@ class ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
   
   alias_method_chain :add_column_options!, :foreign_key_constraints
 
-  def strip_all_fk_constraints(table)
-    all_fk_constraints_for(table).each {|c| drop_fk_constraint(table, c)}
+  def strip_all_foreign_key_constraints(table_name)
+    all_foreign_key_constraints_for(table_name).each {|c| drop_fk_constraint(table_name, c)}
   end
 
-  def all_fk_constraints_for(table)
+  def all_foreign_key_constraints_for(table_name)
     select_values("SELECT conname FROM pg_constraint WHERE " +
-      "conrelid='#{table}'::regclass::oid AND contype='f'")
+      "conrelid='#{table_name}'::regclass::oid AND contype='f'")
   end
 
-  def drop_fk_constraint(table, constraint_name)
-    execute "ALTER TABLE #{table} DROP CONSTRAINT #{constraint_name}"
+  def drop_fk_constraint(table_name, constraint_name)
+    execute "ALTER TABLE #{table_name} DROP CONSTRAINT #{constraint_name}"
   end
 end
 

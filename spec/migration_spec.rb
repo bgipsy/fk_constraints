@@ -5,6 +5,7 @@ require File.dirname(__FILE__) + '/../init'
 
 DB_CONFIG = {
   :adapter => 'postgresql',
+  :min_messages => 'fatal',
   :database => 'fk_constraints_plugin_test',
   :username => 'postgres'}.with_indifferent_access
 
@@ -96,9 +97,30 @@ describe ActiveRecord::Migration do
     lambda { StrangeChild.create!(:parent_name => 'ABC') }.should raise_error(ActiveRecord::StatementInvalid)
   end
 
-  it "should allow adding fk constraints for exisitng tables"
+  class AddConstraintTestChild < ActiveRecord::Base
+  end
 
-  it "should allow removing fk constraints for existing tables"
+  it "should allow adding fk constraints for exisitng tables" do
+    connection.create_table :add_constraint_test_children do |t|
+      t.integer :parent_id, :references => false
+    end
+    lambda { AddConstraintTestChild.create!(:parent_id => max_parent_id + 1) }.should_not raise_error
+    AddConstraintTestChild.delete_all
+    connection.add_foreign_key_constraint(:add_constraint_test_children, :parent_id, :parents)
+    lambda { AddConstraintTestChild.create!(:parent_id => max_parent_id + 1) }.should raise_error(ActiveRecord::StatementInvalid)
+  end
+
+  class RemoveConstraintTestChild < ActiveRecord::Base
+  end
+
+  it "should allow removing fk constraints for existing tables" do
+    connection.create_table :remove_constraint_test_children do |t|
+      t.integer :parent_id
+    end
+    lambda { RemoveConstraintTestChild.create!(:parent_id => max_parent_id + 1) }.should raise_error(ActiveRecord::StatementInvalid)
+    connection.remove_foreign_key_constraint(:remove_constraint_test_children, :parent_id)
+    lambda { RemoveConstraintTestChild.create!(:parent_id => max_parent_id + 1) }.should_not raise_error
+  end
 
   it "should strip fk constraints when loding fixtures by default"
 

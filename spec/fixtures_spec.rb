@@ -1,6 +1,9 @@
 require File.dirname(__FILE__) + '/spec_helper'
-require 'active_support/test_case'
+require 'active_record/test_case'
 require 'active_record/fixtures'
+
+ActiveSupport::TestCase.send(:include, ActiveRecord::TestFixtures)
+
 require File.dirname(__FILE__) + '/../init'
 
 describe ActiveSupport::TestCase do

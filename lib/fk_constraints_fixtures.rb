@@ -18,4 +18,4 @@ module ActiveRecord::FkConstraintsFixtures
   end
 end
 
-Test::Unit::TestCase.send(:include, ActiveRecord::FkConstraintsFixtures)
+ActiveSupport::TestCase.send(:include, ActiveRecord::FkConstraintsFixtures)

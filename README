@@ -1,13 +1,72 @@
 FkConstraints
 =============
 
-Introduction goes here.
+Here's a plugin to add foreign keys for associations. Postgres only for now. It
+doesn't have any dependencies. And it's code is simple so it can be read in one
+take. The Two things that I like in plugins.
+
+In migrations, when a table is created, it recognizes columns which are foreign
+keys by _id suffix. Then it adds foreign key constraint declarations. Referred
+table name is guessed from column's name according to rails conventions.
+
+If a column should refer to a table which name can't be inferred that way,
+you can explicitly specify it by using a symbol or a string. They offer
+different type of control. Symbols are nice to name tables so:
+
+ create_table :comments do |t|
+   t.integer :post_id, :references => :posts
+ end
+
+will produce
+
+ CREATE TABLE comments(
+ ...
+ post_id INTEGER REFERENCES posts
+ ...
+ );
 
 
-Example
-=======
+And with strings you can do all the things that you shouldn't want to do:
 
-Example goes here.
+ ... :references => 'whatever(strange_pk) ON DELETE RESTRICT'
+
+ ... REFERENCES whatever(strange_pk) ON DELETE RESTRICT
+
+That can become handy when dealing with nasty legacy schemas.
+
+And you can add foreign key constraints for already created tables:
 
 
-Copyright (c) 2009 [name of plugin creator], released under the MIT license
+ add_fk_constraint(:posts, :comment_id, :comments, :p_id)
+
+will execute
+
+ ALTER TABLE posts ADD FOREIGN KEY (comment_id) REFERENCES comments(p_id);
+
+
+ More examples
+ -------------
+
+ Please find more examples in spec/migration_spec.rb
+
+
+ Fixtures
+ --------
+
+Recent versions of Rails disable referrential integrity before loading
+fixtures, so your foreign key constraints shouldn't make much trouble in tests.
+
+
+ Install
+ -------
+
+To install run this command from your app root directory:
+
+ ./script/plugin install git://github.com/bgipsy/fk_constraints.git
+
+
+
+
+Tested with postgres 8.2 & Rails 2.3.2
+
+Copyright (c) 2009 [Serg Balyuk], released under the MIT license

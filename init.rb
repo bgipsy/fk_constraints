@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/lib/fk_constraints'
 
-if defined?(ActiveSupport::TestCase)
+if RAILS_ENV == "test"
   require File.dirname(__FILE__) + '/lib/fk_constraints_fixtures'
 end
